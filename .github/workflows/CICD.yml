@@ -24,24 +24,7 @@ jobs:
       - name: Build
         run: mvn compile
 
-      - name: Cache Maven packages
-        uses: actions/cache@v2
-        with:
-          path: ${{ env.MAVEN_OPTS }}
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/*.xml') }}
-          restore-keys: ${{ runner.os }}-maven-
-
-      - name: Test
-        run: mvn test
-
-      - name: Analyze
-        run: |
-          mvn sonar:sonar \
-          -Dsonar.projectKey=sdajiz80324zhi \
-          -Dsonar.host.url=http://sonarqube:9000 \
-          -Dsonar.login=$sonar_login -Dsonar.qualitygate.wait=true
-
-  package:
+  test:
     runs-on: self-hosted
     strategy:
       matrix:
@@ -53,6 +36,21 @@ jobs:
         uses: actions/setup-java@v2
         with:
           java-version: ${{ matrix.java }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Test
+        run: mvn test
+
+  package:
+    runs-on: self-hosted
+    needs: build
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v2
+        with:
+          java-version: 17
 
       - name: Checkout code
         uses: actions/checkout@v2
