@@ -1,0 +1,61 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        java: [17]
+    steps:
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build
+        run: mvn compile
+
+      - name: Cache Maven packages
+        uses: actions/cache@v2
+        with:
+          path: ${{ env.MAVEN_OPTS }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/*.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
+
+      - name: Test
+        run: mvn test
+
+      - name: Analyze
+        run: |
+          mvn sonar:sonar \
+          -Dsonar.projectKey=sdajiz80324zhi \
+          -Dsonar.host.url=http://sonarqube:9000 \
+          -Dsonar.login=$sonar_login -Dsonar.qualitygate.wait=true
+
+  package:
+    runs-on: self-hosted
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        java: [17]
+    needs: build
+    steps:
+      - name: Set up JDK ${{ matrix.java }}
+        uses: actions/setup-java@v2
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Package
+        run: mvn package
