@@ -18,3 +18,4 @@ Effort in hours: 5
 ### Task 1.c
 
 <!--- describe your solution here --->
+![Github Pipeline Finish.png](img%2FGithub%20Pipeline%20Finish.png)
