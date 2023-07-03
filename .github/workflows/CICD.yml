@@ -1,4 +1,4 @@
-name: CI/CD Pipeline
+name: Build, Test, and Package
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  build:
+  build-test-package:
     runs-on: self-hosted
     strategy:
       matrix:
@@ -24,36 +24,8 @@ jobs:
       - name: Build
         run: mvn compile
 
-  test:
-    runs-on: self-hosted
-    strategy:
-      matrix:
-        os: [ubuntu-latest]
-        java: [17]
-    needs: build
-    steps:
-      - name: Set up JDK ${{ matrix.java }}
-        uses: actions/setup-java@v2
-        with:
-          java-version: ${{ matrix.java }}
-
-      - name: Checkout code
-        uses: actions/checkout@v2
-
       - name: Test
         run: mvn test
-
-  package:
-    runs-on: self-hosted
-    needs: build
-    steps:
-      - name: Set up JDK 17
-        uses: actions/setup-java@v2
-        with:
-          java-version: 17
-
-      - name: Checkout code
-        uses: actions/checkout@v2
 
       - name: Package
         run: mvn package
